@@ -2,13 +2,13 @@ name: Sync Garmin to Notion
 
 on:
   schedule:
-    # This cron job will run every 15 minutes from 6 AM to 11 PM Eastern Time
-    # - cron: '*/10 10-23 * * *'  # Every 15 minutes from 10:00 to 23:45 UTC 
-    # - cron: '*/10 0-3 * * *'    # Every 15 minutes from 00:00 to 03:45 UTC
-    - cron: '0 1 * * *' # Daily
+    # Runs every 15 minutes from 6 AM to 11 PM Zurich time
+    # Zurich is UTC+1 (winter) or UTC+2 (summer)
+    # To cover both DST periods, we run from 4 AM to 10 PM UTC (covers 6 AM - 11 PM in both CET and CEST)
+    - cron: '*/15 4-21 * * *'  # Every 15 minutes from 4:00 to 21:45 UTC
   workflow_dispatch:
 env:
-  TZ: 'America/Montreal'
+  TZ: 'Europe/Zurich'
 
 jobs:
   sync:
@@ -43,9 +43,6 @@ jobs:
           NOTION_PR_DB_ID: ${{ secrets.NOTION_PR_DB_ID }}
           NOTION_STEPS_DB_ID: ${{ secrets.NOTION_STEPS_DB_ID }}
           NOTION_SLEEP_DB_ID: ${{ secrets.NOTION_SLEEP_DB_ID }}
-          TZ: 'America/Montreal'
+          TZ: 'Europe/Zurich'
         run: |
           python garmin-activities.py
-          python personal-records.py
-          python daily-steps.py
-          python sleep-data.py
