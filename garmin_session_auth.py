@@ -6,7 +6,7 @@ to avoid triggering security alerts when logging in from different locations.
 
 import os
 import pickle  # nosec B403 - We only load our own trusted session files
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 
 from garminconnect import Garmin, GarminConnectAuthenticationError
@@ -64,10 +64,12 @@ class GarminSessionAuth:
         with open(self.session_file, "rb") as f:
             session_data = pickle.load(f)  # nosec B301 - Loading our own session file
 
-        # Check if session is not too old (refresh every 360 days)
+        # Session age check disabled - sessions are permanent until they expire
         session_age = datetime.now() - session_data["timestamp"]
-        if session_age > timedelta(days=360):
-            raise Exception(f"Session too old ({session_age.days} days)")
+        # if session_age > timedelta(days=360):
+        #     raise Exception(f"Session too old ({session_age.days} days)")
+        # Just log the age for information
+        print(f"Session age: {session_age.days} days")
 
         # Initialize Garmin and restore session
         self.garmin = Garmin()
@@ -77,7 +79,7 @@ class GarminSessionAuth:
         try:
             # Test API call to verify session
             self.garmin.get_full_name()
-            print(f"Session valid (age: {session_age.days} days)")
+            print("Session is valid and will be used")
             return self.garmin
         except GarminConnectAuthenticationError:
             raise Exception("Session expired or invalid")
