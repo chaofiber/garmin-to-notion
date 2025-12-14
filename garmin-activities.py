@@ -154,6 +154,19 @@ def activity_needs_update(existing_activity, new_activity):
         new_activity.get("activityType", {}).get("typeKey", "Unknown"), activity_name
     )
 
+    # Calculate distance - for skiing activities, use SKI_RUN_SPLIT distance
+    distance_km = round(new_activity.get("distance", 0) / 1000, 2)
+    activity_type_key = new_activity.get("activityType", {}).get("typeKey", "").lower()
+
+    # For resort skiing/snowboarding, use the actual ski run distance from split summaries
+    if activity_type_key in ["resort_skiing", "resort_snowboarding", "resort_snowshoeing"]:
+        split_summaries = new_activity.get("splitSummaries", [])
+        for split in split_summaries:
+            if split.get("splitType") == "SKI_RUN_SPLIT":
+                # Use the ski run distance (excludes lift rides)
+                distance_km = round(split.get("distance", 0) / 1000, 2)
+                break
+
     # Check if 'Subactivity Type' property exists
     has_subactivity = (
         "Subactivity Type" in existing_props
@@ -162,8 +175,7 @@ def activity_needs_update(existing_activity, new_activity):
     )
 
     return (
-        existing_props["Distance (km)"]["number"]
-        != round(new_activity.get("distance", 0) / 1000, 2)
+        existing_props["Distance (km)"]["number"] != distance_km
         or existing_props["Duration (min)"]["number"]
         != round(new_activity.get("duration", 0) / 60, 2)
         or existing_props["Calories"]["number"] != round(new_activity.get("calories", 0))
@@ -205,12 +217,25 @@ def create_activity(client, database_id, activity):
         activity_subtype if activity_subtype != activity_type else activity_type
     )
 
+    # Calculate distance - for skiing activities, use SKI_RUN_SPLIT distance
+    distance_km = round(activity.get("distance", 0) / 1000, 2)
+    activity_type_key = activity.get("activityType", {}).get("typeKey", "").lower()
+
+    # For resort skiing/snowboarding, use the actual ski run distance from split summaries
+    if activity_type_key in ["resort_skiing", "resort_snowboarding", "resort_snowshoeing"]:
+        split_summaries = activity.get("splitSummaries", [])
+        for split in split_summaries:
+            if split.get("splitType") == "SKI_RUN_SPLIT":
+                # Use the ski run distance (excludes lift rides)
+                distance_km = round(split.get("distance", 0) / 1000, 2)
+                break
+
     properties = {
         "Date": {"date": {"start": activity_date}},
         "Activity Type": {"select": {"name": activity_type}},
         "Subactivity Type": {"select": {"name": activity_subtype}},
         "Activity Name": {"title": [{"text": {"content": activity_name}}]},
-        "Distance (km)": {"number": round(activity.get("distance", 0) / 1000, 2)},
+        "Distance (km)": {"number": distance_km},
         "Duration (min)": {"number": round(activity.get("duration", 0) / 60, 2)},
         "Calories": {"number": round(activity.get("calories", 0))},
         "Avg Pace": {
@@ -266,10 +291,23 @@ def update_activity(client, existing_activity, new_activity):
         activity_subtype if activity_subtype != activity_type else activity_type
     )
 
+    # Calculate distance - for skiing activities, use SKI_RUN_SPLIT distance
+    distance_km = round(new_activity.get("distance", 0) / 1000, 2)
+    activity_type_key = new_activity.get("activityType", {}).get("typeKey", "").lower()
+
+    # For resort skiing/snowboarding, use the actual ski run distance from split summaries
+    if activity_type_key in ["resort_skiing", "resort_snowboarding", "resort_snowshoeing"]:
+        split_summaries = new_activity.get("splitSummaries", [])
+        for split in split_summaries:
+            if split.get("splitType") == "SKI_RUN_SPLIT":
+                # Use the ski run distance (excludes lift rides)
+                distance_km = round(split.get("distance", 0) / 1000, 2)
+                break
+
     properties = {
         "Activity Type": {"select": {"name": activity_type}},
         "Subactivity Type": {"select": {"name": activity_subtype}},
-        "Distance (km)": {"number": round(new_activity.get("distance", 0) / 1000, 2)},
+        "Distance (km)": {"number": distance_km},
         "Duration (min)": {"number": round(new_activity.get("duration", 0) / 60, 2)},
         "Calories": {"number": round(new_activity.get("calories", 0))},
         "Avg Pace": {
