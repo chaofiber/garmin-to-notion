@@ -2,17 +2,17 @@
 # Garmin to Notion Integration :watch:
 This project connects your Garmin activities and personal records to your Notion database, allowing you to keep track of your performance metrics in one place.
 
-## Features :sparkles:  
-  🔄  Automatically sync Garmin activities to Notion in real-time  
-  📊  Track detailed activity metrics (distance, pace, heart rate)  
-  🎯  Extract and track personal records (fastest 1K, longest ride)  
+## Features :sparkles:
+  🔄  Automatically sync Garmin activities to Notion in real-time
+  📊  Track detailed activity metrics (distance, pace, heart rate)
+  🎯  Extract and track personal records (fastest 1K, longest ride)
   👣  Optional daily steps tracker
-  😴  Optional sleep data tracker  
-  🤖  Zero-touch automation once configured  
-  📱  Compatible with all Garmin activities and devices  
-  🔧  Easy setup with clear instructions and minimal coding required  
+  😴  Optional sleep data tracker
+  🤖  Zero-touch automation once configured
+  📱  Compatible with all Garmin activities and devices
+  🔧  Easy setup with clear instructions and minimal coding required
 
-## Prerequisites :hammer_and_wrench:  
+## Prerequisites :hammer_and_wrench:
 - A Notion account with API access.
 - A Garmin Connect account to pull activity data.
 - If you wish to sync your Peloton workouts with Garmin, see [peloton-to-garmin](https://github.com/philosowaffle/peloton-to-garmin)
@@ -39,26 +39,26 @@ For more advanced users, follow these steps to set up the integration:
   * NOTION_STEPS_DB_ID (optional)
   * NOTION_SLEEP_DB_ID (optional)
 ### 5. Run Scripts (if not using automatic workflow)
-* Run [garmin-activities.py](https://github.com/chloevoyer/garmin-to-notion/blob/main/garmin-activities.py) to sync your Garmin activities to Notion.  
+* Run [garmin-activities.py](https://github.com/chloevoyer/garmin-to-notion/blob/main/garmin-activities.py) to sync your Garmin activities to Notion.
 `python garmin-activities.py`
-* Run [person-records.py](https://github.com/chloevoyer/garmin-to-notion/blob/main/personal-records.py) to extract activity records (e.g., fastest run, longest ride).  
-`python personal-records.py` 
-## Example Configuration :pencil:  
-You can customize the scripts to fit your needs by modifying environment variables and Notion database settings.  
+* Run [person-records.py](https://github.com/chloevoyer/garmin-to-notion/blob/main/personal-records.py) to extract activity records (e.g., fastest run, longest ride).
+`python personal-records.py`
+## Example Configuration :pencil:
+You can customize the scripts to fit your needs by modifying environment variables and Notion database settings.
 
-Here is a screenshot of what my Notion dashboard looks like:  
+Here is a screenshot of what my Notion dashboard looks like:
 ![garmin-to-notion-template](https://github.com/user-attachments/assets/b37077cc-fe87-466f-9424-8ba9e4efa909)
 
 
 My Notion template is available for free and can be duplicated to your Notion [here](https://www.notion.so/templates/fitness-tracker-738)
 
-## Acknowledgements :raised_hands:  
+## Acknowledgements :raised_hands:
 - Reference dictionary and examples can be found in [cyberjunky/python-garminconnect](https://github.com/cyberjunky/python-garminconnect.git).
 - This project was inspired by [n-kratz/garmin-notion](https://github.com/n-kratz/garmin-notion.git).
-## Contributing :handshake:   
-Contributions are welcome! If you find a bug or want to add a feature, feel free to open an issue or submit a pull request. Financial contributions are also greatly appreciated :blush:    
+## Contributing :handshake:
+Contributions are welcome! If you find a bug or want to add a feature, feel free to open an issue or submit a pull request. Financial contributions are also greatly appreciated :blush:
 
-<a href="https://www.buymeacoffee.com/cvoyer" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>   
+<a href="https://www.buymeacoffee.com/cvoyer" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
 
-## :copyright: License  
+## :copyright: License
 This project is licensed under the MIT License. See the LICENSE file for more details.
