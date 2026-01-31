@@ -120,7 +120,9 @@ def format_pace(average_speed):
         return ""
 
 
-def activity_exists(client, database_id, activity_date, activity_type, activity_name):
+def activity_exists(
+    client, database_id, activity_date, activity_type, activity_name, activity_id=None
+):
     # Check if an activity already exists in the Notion database and return it if found.
 
     # Handle the activity_type which is now a tuple
@@ -132,6 +134,32 @@ def activity_exists(client, database_id, activity_date, activity_type, activity_
     # Determine the correct activity type for the lookup
     lookup_type = "Stretching" if "stretch" in activity_name.lower() else main_type
 
+    # First try to find by Garmin ID if available
+    if activity_id:
+        try:
+            # Try multi_select first (current setup)
+            query = client.databases.query(
+                database_id=database_id,
+                filter={"property": "Garmin ID", "multi_select": {"contains": str(activity_id)}},
+            )
+            if query["results"]:
+                return query["results"][0]
+        except Exception:
+            try:
+                # Fallback to rich_text if multi_select fails
+                query = client.databases.query(
+                    database_id=database_id,
+                    filter={"property": "Garmin ID", "rich_text": {"equals": str(activity_id)}},
+                )
+                if query["results"]:
+                    return query["results"][0]
+            except Exception:
+                # Garmin ID property doesn't exist or has different type, skip this check
+                print(
+                    f"Garmin ID property not found or incompatible type for activity {activity_id}"
+                )
+
+    # Always check by date/type/name to find existing activities (even without Garmin ID)
     query = client.databases.query(
         database_id=database_id,
         filter={
@@ -143,6 +171,9 @@ def activity_exists(client, database_id, activity_date, activity_type, activity_
         },
     )
     results = query["results"]
+
+    # If we found an existing activity without Garmin ID, we should return it
+    # This prevents creating duplicates of old entries
     return results[0] if results else None
 
 
@@ -268,6 +299,10 @@ def create_activity(client, database_id, activity):
         "Fav": {"checkbox": activity.get("favorite", False)},
     }
 
+    # Only add Garmin ID if we have it (as multi_select)
+    if activity.get("activityId"):
+        properties["Garmin ID"] = {"multi_select": [{"name": str(activity.get("activityId"))}]}
+
     page = {
         "parent": {"database_id": database_id},
         "properties": properties,
@@ -340,6 +375,10 @@ def update_activity(client, existing_activity, new_activity):
         "Fav": {"checkbox": new_activity.get("favorite", False)},
     }
 
+    # Only add Garmin ID if we have it (as multi_select)
+    if new_activity.get("activityId"):
+        properties["Garmin ID"] = {"multi_select": [{"name": str(new_activity.get("activityId"))}]}
+
     update = {
         "page_id": existing_activity["id"],
         "properties": properties,
@@ -368,11 +407,11 @@ def main():
     print(f"Total activities: {len(activities)}")
 
     # Process all activities
-    cutoff_date = datetime.now() - timedelta(days=14)
+    cutoff_date = datetime.now() - timedelta(days=1)
 
     for activity in activities:
         activity_date = activity.get("startTimeGMT")
-        # Update activities in the past 2 weeks
+        # Update activities in the past one day
         activity_datetime = datetime.fromisoformat(activity_date.replace("Z", "+00:00"))
         if activity_datetime < cutoff_date:
             continue
@@ -382,8 +421,9 @@ def main():
         )
 
         # Check if activity already exists in Notion
+        activity_id = activity.get("activityId")
         existing_activity = activity_exists(
-            client, database_id, activity_date, activity_type, activity_name
+            client, database_id, activity_date, activity_type, activity_name, activity_id
         )
 
         if existing_activity:
