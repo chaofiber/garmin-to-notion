@@ -348,6 +348,12 @@ def main():
     parser.add_argument(
         "--rebuild", action="store_true", help="Rebuild page content for existing workouts"
     )
+    parser.add_argument(
+        "--days",
+        type=int,
+        default=1,
+        help="Only process workouts from the last N days (default: 1, 0 = all)",
+    )
     args = parser.parse_args()
 
     csv_path = args.csv or os.getenv("STRONG_CSV_PATH")
@@ -368,8 +374,20 @@ def main():
     exercise_db_id = get_or_create_exercise_db(client, database_id)
 
     # Parse CSV
-    workouts = parse_csv(csv_path)
-    print(f"Found {len(workouts)} workouts in CSV")
+    all_workouts = parse_csv(csv_path)
+    print(f"Found {len(all_workouts)} workouts in CSV")
+
+    # Filter to recent workouts only
+    if args.days > 0:
+        cutoff = datetime.now() - timedelta(days=args.days)
+        workouts = {
+            date: w
+            for date, w in all_workouts.items()
+            if datetime.strptime(date, "%Y-%m-%d %H:%M:%S") >= cutoff
+        }
+        print(f"Processing {len(workouts)} workouts from the last {args.days} days")
+    else:
+        workouts = all_workouts
 
     created = 0
     updated = 0
