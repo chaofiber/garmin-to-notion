@@ -84,6 +84,7 @@ garmin_session.pkl
 *.crt
 *.p12
 *.pfx
+strong-sync-notion-*.json
 
 # Logs
 *.log
